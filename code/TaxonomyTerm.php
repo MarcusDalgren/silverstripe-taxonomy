@@ -2,7 +2,8 @@
 
 class TaxonomyTerm extends DataObject implements PermissionProvider {
 	private static $db = array(
-		'Name' => 'Varchar(255)'
+		'Name' => 'Varchar(255)',
+		'SortOrder' => 'Int'
 	);
 
 	private static $has_many = array(
@@ -18,6 +19,7 @@ class TaxonomyTerm extends DataObject implements PermissionProvider {
 
 		// For now moving taxonomy terms is not supported.
 		$fields->removeByName('ParentID');
+		$fields->removeByName('SortOrder');
 
 		$childrenGrid = $fields->dataFieldByName('Children');
 		if($childrenGrid) {
@@ -28,7 +30,17 @@ class TaxonomyTerm extends DataObject implements PermissionProvider {
 			$childrenGrid->getConfig()->removeComponent($deleteAction);
 			$childrenGrid->getConfig()->addComponent(new GridFieldDeleteAction(false));
 		}
-
+		$config = GridFieldConfig::create()
+			->addComponent(new GridFieldButtonRow('before'))
+			->addComponent(new GridFieldToolbarHeader())
+			->addComponent(new GridFieldTitleHeader())
+			->addComponent(new GridFieldEditableColumns())
+			->addComponent(new GridFieldDeleteAction())
+			->addComponent(new GridFieldAddNewInlineButton())
+			->addComponent(new GridFieldOrderableRows('SortOrder'));
+		//$childrenGrid->setConfig($config);
+		$fields->removeByName('Children');
+		$fields->addFieldToTab("Root.Main", new GridField("Children", "Terms", $this->Children(), $config));
 		return $fields;
 	}
 
@@ -47,6 +59,12 @@ class TaxonomyTerm extends DataObject implements PermissionProvider {
 
 	public function getTaxonomyName() {
 		return $this->getTaxonomy()->Name;
+	}
+	public function onBeforeWrite() {
+		parent::onBeforeWrite();
+		if ($this->Parent()->ID > 0 && $this->SortOrder == 0) {
+			$this->SortOrder = ($this->Parent()->Children()->Count() + 1);
+		}
 	}
 
 	public function onBeforeDelete() {
