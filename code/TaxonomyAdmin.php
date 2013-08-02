@@ -9,7 +9,7 @@ class TaxonomyAdmin extends ModelAdmin {
 
 	private static $url_segment = 'taxonomy';
 
-	private static $managed_models = array('TaxonomyTerm');
+	private static $managed_models = array('AssetType','TaxonomyTerm');
 
 	private static $menu_title = 'Taxonomies';
 	
@@ -17,7 +17,7 @@ class TaxonomyAdmin extends ModelAdmin {
 
 	public function getList() {
 		$list = parent::getList();
-		return $list->filter('ParentID', '0');
+		return ($this->modelClass == "TaxonomyTerm") ? $list->filter('ParentID', '0') : $list;
 	}
 
 }
