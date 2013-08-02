@@ -108,4 +108,14 @@ class TaxonomyTerm extends DataObject implements PermissionProvider {
 		);
 	}
 
+	public function toMap() {
+		$map["ID"] = $this->ID;
+		$map["Title"] = $this->Name;
+
+		$map["Children"] = array();
+		if ($this->ParentID == 0) {
+			$map["Children"] = $this->Children()->sort("SortOrder")->toNestedArray();
+		}
+		return $map;
+	}
 }
