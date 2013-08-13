@@ -14,6 +14,10 @@ class TaxonomyTerm extends DataObject implements PermissionProvider {
 		'Parent' => 'TaxonomyTerm'
 	);
 
+	private static $belongs_many_many = array(
+		'Documents' => 'BeapDocument'
+	);
+
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
 
